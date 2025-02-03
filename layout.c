@@ -18,10 +18,14 @@ static const int baseMargin = 20;       // Left margin from window edge.
 static int is_block_element(const char *tag) {
     if (!tag) return 0;
     if (strcasecmp(tag, "div") == 0 ||
-        strcasecmp(tag, "p") == 0 ||
         strcasecmp(tag, "h1") == 0 ||
         strcasecmp(tag, "h2") == 0 ||
-        strcasecmp(tag, "h3") == 0)
+        strcasecmp(tag, "h3") == 0 ||
+        strcasecmp(tag, "h4") == 0 ||
+        strcasecmp(tag, "h5") == 0 ||
+        strcasecmp(tag, "nav") == 0 ||
+        strcasecmp(tag, "p") == 0 ||
+        strcasecmp(tag, "summary") == 0)
         return 1;
     return 0;
 }
@@ -31,11 +35,13 @@ static int is_inline_element(const char *tag) {
     if (!tag) return 0;
     // Treat common inline elements.
     if (strcasecmp(tag, "span") == 0 ||
+        strcasecmp(tag, "a") == 0 ||
+        strcasecmp(tag, "code") == 0 ||
         strcasecmp(tag, "b") == 0 ||
         strcasecmp(tag, "i") == 0 ||
         strcasecmp(tag, "small") == 0 ||
         strcasecmp(tag, "u") == 0 ||
-        strcasecmp(tag, "em") == 0 ||
+        strcasecmp(tag, "ul") == 0 ||
         strcasecmp(tag, "strong") == 0)
         return 1;
     // Also treat text nodes as inline.

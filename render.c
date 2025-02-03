@@ -73,12 +73,12 @@ static void render_text(SDL_Renderer *renderer, TTF_Font *font, const char *text
     SDL_Color textColor = {0, 0, 0, 255};  // black text
     SDL_Surface *textSurface = TTF_RenderUTF8_Blended(font, text, textColor);
     if (!textSurface) {
-        fprintf(stderr, "Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
+        //fprintf(stderr, "Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
         return;
     }
     SDL_Texture *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
     if (!textTexture) {
-        fprintf(stderr, "Unable to create texture from rendered text! SDL Error: %s\n", SDL_GetError());
+        // fprintf(stderr, "Unable to create texture from rendered text! SDL Error: %s\n", SDL_GetError());
         SDL_FreeSurface(textSurface);
         return;
     }
