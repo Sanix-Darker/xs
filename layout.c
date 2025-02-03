@@ -187,5 +187,8 @@ void free_layout(Layout* layout) {
     if (!layout)
         return;
     free(layout->boxes);
+    // Free the DOM that was stored in the layout.
+    if (layout->dom)
+        free_dom(layout->dom);
     free(layout);
 }

@@ -5,12 +5,13 @@
 
 typedef struct {
     int x, y, width, height;
-    DOMNode* node;
+    DOMNode *node;  // Pointer to the original DOM node.
 } LayoutBox;
 
 typedef struct {
-    LayoutBox* boxes;
+    LayoutBox *boxes;
     int count;
+    DOMNode *dom;   // Store pointer to the DOM used to generate this layout.
 } Layout;
 
 Layout* layout_dom(DOMNode* root);
