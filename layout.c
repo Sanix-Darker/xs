@@ -1,200 +1,204 @@
 #include "layout.h"
 #include "css.h"
+#include "tag_tables.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdbool.h>
+#include <limits.h>
 
-// for my block rendering
-static const int blockIndent = 20;      // Indentation for block children.
-static const int verticalMargin = 10;   // Vertical margin between lines.
-static const int inlineMargin = 5;      // Horizontal margin between inline boxes.
-static const int defaultWindowWidth = 800;
-static const int baseMargin = 20;       // Left margin from window edge.
+/* ------------------------------------------------------------------ */
+/* Tunables                                                           */
+enum {
+    BLOCK_INDENT       = 20,
+    VERTICAL_MARGIN    = 10,
+    INLINE_MARGIN      = 5,
+    DEFAULT_WINDOW_W   = 800,
+    BASE_MARGIN        = 20,
+    INLINE_HEIGHT_DEF  = 20,
+    BLOCK_HEIGHT_DEF   = 30
+};
 
-// --- Helper Functions to Classify Elements ---
+/* ------------------------------------------------------------------ */
+/* Internal helpers                                                   */
 
-// Return 1 if tag is considered block-level.
-static int is_block_element(const char *tag) {
-    if (!tag) return 0;
-    if (strcasecmp(tag, "div") == 0 ||
-        strcasecmp(tag, "h1") == 0 ||
-        strcasecmp(tag, "h2") == 0 ||
-        strcasecmp(tag, "h3") == 0 ||
-        strcasecmp(tag, "h4") == 0 ||
-        strcasecmp(tag, "h5") == 0 ||
-        strcasecmp(tag, "nav") == 0 ||
-        strcasecmp(tag, "p") == 0 ||
-        strcasecmp(tag, "summary") == 0)
-        return 1;
-    return 0;
-}
-
-// Return 1 if tag is considered inline.
-static int is_inline_element(const char *tag) {
-    if (!tag) return 0;
-    // Treat common inline elements.
-    if (strcasecmp(tag, "span") == 0 ||
-        strcasecmp(tag, "a") == 0 ||
-        strcasecmp(tag, "code") == 0 ||
-        strcasecmp(tag, "b") == 0 ||
-        strcasecmp(tag, "i") == 0 ||
-        strcasecmp(tag, "small") == 0 ||
-        strcasecmp(tag, "u") == 0 ||
-        strcasecmp(tag, "ul") == 0 ||
-        strcasecmp(tag, "strong") == 0)
-        return 1;
-    // Also treat text nodes as inline.
-    if (strcmp(tag, "#text") == 0) return 1;
-    return 0;
-}
-
-// --- Helper: Parse Dimension from Computed Style ---
-// Converts a string such as "600px" to an integer.
-static int parse_dimension(const char* dim_str, int default_value) {
-    if (!dim_str) return default_value;
-    int value = atoi(dim_str); // This ignores non-digit characters.
-    return (value > 0) ? value : default_value;
-}
-
-// --- The Core Layout Function ---
-//
-// Parameters:
-//   node: the current DOM node to layout.
-//   layout: pointer to the Layout structure (which holds an array of LayoutBox).
-//   base_x: starting x coordinate for the current container.
-//   current_y: pointer to the current vertical position (this value is updated as boxes are placed).
-//   current_inline_x: pointer to the current x position for inline elements on the same line.
-//   available_width: horizontal space available from base_x to the right edge.
-//
-static void layout_node(DOMNode* node, Layout* layout, int base_x, int *current_y, int *current_inline_x, int available_width) {
-    if (!node || !node->name)
-        return;
-
-    // Skip <script> and <style> nodes entirely.
-    if (strcasecmp(node->name, "script") == 0 || strcasecmp(node->name, "style") == 0)
-        return;
-
-    // If the node is block-level, flush any inline content and create a new block.
-    if (is_block_element(node->name)) {
-        // Flush inline: reset current inline x.
-        *current_inline_x = base_x;
-
-        // Determine defaults for this block.
-        int default_height = 30;
-        if (strcasecmp(node->name, "h1") == 0) default_height = 40;
-        else if (strcasecmp(node->name, "h2") == 0) default_height = 35;
-        else if (strcasecmp(node->name, "h3") == 0) default_height = 30;
-        // For paragraphs and divs, keep the default.
-
-        int width = available_width;  // in other for Block takes full available width.
-        int height = default_height;
-        if (node->style && node->style->width)
-            width = parse_dimension(node->style->width, available_width);
-        if (node->style && node->style->height)
-            height = parse_dimension(node->style->height, default_height);
-
-        // Create the block layout box.
-        LayoutBox box;
-        box.x = base_x;
-        box.y = *current_y;
-        box.width = width;
-        box.height = height;
-        box.node = node;
-        layout->boxes = realloc(layout->boxes, sizeof(LayoutBox) * (layout->count + 1));
-        layout->boxes[layout->count++] = box;
-
-        // Update vertical position for next block.
-        *current_y += height + verticalMargin;
-        // For children of a block, indent them.
-        int child_inline_x = base_x + blockIndent;
-        int child_avail_width = available_width - blockIndent;
-        for (int i = 0; i < node->children_count; i++) {
-            layout_node(node->children[i], layout, base_x + blockIndent, current_y, &child_inline_x, child_avail_width);
-        }
-        // Reset inline x after processing block children.
-        *current_inline_x = base_x;
+/* fast case‑insensitive strcmp that assumes ASCII letters            */
+static inline int icmp(const char *a, const char *b)
+{
+    for ( ; *a && *b; ++a, ++b) {
+        unsigned ca = (unsigned char)*a, cb = (unsigned char)*b;
+        ca = (ca >= 'A' && ca <= 'Z') ? ca + 32 : ca;
+        cb = (cb >= 'A' && cb <= 'Z') ? cb + 32 : cb;
+        if (ca != cb) return ca - cb;
     }
-    // Else if the node is inline-level, add it to the current inline container.
-    else if (is_inline_element(node->name)) {
-        int inline_width = 0;
-        int inline_height = 20; // default inline height.
+    return (unsigned char)*a - (unsigned char)*b;
+}
+
+/* binary search in the tag tables (tables are sorted, lower‑case)    */
+static bool tag_in_table(const char *tag, const char *const table[], size_t n)
+{
+    if (!tag) return false;
+    size_t lo = 0, hi = n;
+    while (lo < hi) {
+        size_t mid = (lo + hi) / 2;
+        int cmp = icmp(tag, table[mid]);
+        if (cmp == 0) return true;
+        (cmp < 0) ? (hi = mid) : (lo = mid + 1);
+    }
+    return false;
+}
+#define IS_BLOCK(t)  tag_in_table((t), block_tags,  BLOCK_TAGS_N)
+#define IS_INLINE(t) tag_in_table((t), inline_tags, INLINE_TAGS_N)
+
+/* strtol wrapper that understands "<num>px", clamps to ≥0,            *
+ * and falls back to default_value on error/overflow                   */
+static int parse_dimension(const char *s, int default_value)
+{
+    if (!s || !*s) return default_value;
+    char *end;
+    long v = strtol(s, &end, 10);
+    if (end == s || v < 0 || v > INT_MAX) return default_value;
+    return (int)v;
+}
+
+/* Layout vector utility                                              */
+static int ensure_capacity(Layout *lay, size_t extra)
+{
+    if (lay->count + extra <= lay->capacity) return 1;
+    size_t newcap = lay->capacity ? lay->capacity : 16;
+    while (newcap < lay->count + extra) newcap <<= 1;
+    void *tmp = realloc(lay->boxes, newcap * sizeof *lay->boxes);
+    if (!tmp) return 0;
+    lay->boxes = tmp;
+    lay->capacity = newcap;
+    return 1;
+}
+
+/* whitespace test for text nodes                                     */
+static inline bool has_visible_text(const char *txt)
+{
+    for (const unsigned char *p = (const unsigned char*)txt; p && *p; ++p)
+        if (!isspace(*p)) return true;
+    return false;
+}
+
+/* ------------------------------------------------------------------ */
+
+static void
+layout_node(DOMNode *node, Layout *lay,
+            int base_x, int *cur_y, int *cur_inline_x, int avail_w)
+{
+    if (!node || !node->name) return;
+
+    if (icmp(node->name, "script") == 0 || icmp(node->name, "style") == 0)
+        return;
+
+    /* -----------------------------  BLOCK  ------------------------- */
+    if (IS_BLOCK(node->name))
+    {
+        *cur_inline_x = base_x;               /* flush inline          */
+
+        int width  = node->style && node->style->width
+                       ? parse_dimension(node->style->width, avail_w)
+                       : avail_w;
+
+        int height = node->style && node->style->height
+                       ? parse_dimension(node->style->height, BLOCK_HEIGHT_DEF)
+                       : BLOCK_HEIGHT_DEF;
+
+        /* headings get a bit more height                              */
+        if      (icmp(node->name, "h1") == 0) height = 40;
+        else if (icmp(node->name, "h2") == 0) height = 35;
+        else if (icmp(node->name, "h3") == 0) height = 30;
+
+        if (!ensure_capacity(lay, 1)) return; /* OOM guard             */
+        lay->boxes[lay->count++] = (LayoutBox){ .x=base_x, .y=*cur_y,
+                                                .width=width, .height=height,
+                                                .node=node };
+
+        *cur_y += height + VERTICAL_MARGIN;
+
+        int child_base_x = base_x + BLOCK_INDENT;
+        int child_avail  = avail_w - BLOCK_INDENT;
+        int child_inline_x = child_base_x;
+
+        for (int i = 0; i < node->children_count; ++i)
+            layout_node(node->children[i], lay,
+                        child_base_x, cur_y, &child_inline_x, child_avail);
+
+        *cur_inline_x = base_x;               /* reset inline cursor   */
+        return;
+    }
+
+    /* -----------------------------  INLINE ------------------------- */
+    if (IS_INLINE(node->name))
+    {
+        int width  = 0;
+        int height = INLINE_HEIGHT_DEF;
+
         if (strcmp(node->name, "#text") == 0) {
-            // Skip if the text is only whitespace.
-            int hasVisible = 0;
-            if (node->text) {
-                for (const char *p = node->text; *p; p++) {
-                    if (!isspace((unsigned char)*p)) { hasVisible = 1; break; }
-                }
-            }
-            if (!hasVisible)
-                return;
-            // Approximate width: 7 pixels per character.
-            inline_width = strlen(node->text) * 7;
+            if (!has_visible_text(node->text)) return;
+            width = (int)strlen(node->text) * 7;   /* cheap approx.    */
         } else {
-            // For other inline elements, use a default width.
-            inline_width = 50;
+            width = 50;                            /* generic default  */
             if (node->style && node->style->width)
-                inline_width = parse_dimension(node->style->width, inline_width);
+                width = parse_dimension(node->style->width, width);
         }
         if (node->style && node->style->height)
-            inline_height = parse_dimension(node->style->height, inline_height);
+            height = parse_dimension(node->style->height, height);
 
-        // Check if this inline element fits in the remaining space.
-        if ((*current_inline_x) + inline_width > base_x + available_width) {
-            // Move to next line.
-            *current_y += inline_height + verticalMargin;
-            *current_inline_x = base_x;
+        /* wrap line if necessary                                       */
+        if (*cur_inline_x + width > base_x + avail_w) {
+            *cur_y        += height + VERTICAL_MARGIN;
+            *cur_inline_x  = base_x;
         }
 
-        // Create the inline layout box.
-        LayoutBox box;
-        box.x = *current_inline_x;
-        box.y = *current_y;
-        box.width = inline_width;
-        box.height = inline_height;
-        box.node = node;
-        layout->boxes = realloc(layout->boxes, sizeof(LayoutBox) * (layout->count + 1));
-        layout->boxes[layout->count++] = box;
+        if (!ensure_capacity(lay, 1)) return;       /* OOM guard        */
+        lay->boxes[lay->count++] = (LayoutBox){ .x=*cur_inline_x, .y=*cur_y,
+                                                .width=width, .height=height,
+                                                .node=node };
 
-        // Update current inline x.
-        *current_inline_x += inline_width + inlineMargin;
+        *cur_inline_x += width + INLINE_MARGIN;
 
-        // Process any children inline.
-        for (int i = 0; i < node->children_count; i++) {
-            layout_node(node->children[i], layout, *current_inline_x, current_y, current_inline_x, base_x + available_width - (*current_inline_x - base_x));
-        }
-    }
-    // Otherwise, process children recursively without adding a box.
-    else {
-        for (int i = 0; i < node->children_count; i++) {
-            layout_node(node->children[i], layout, base_x, current_y, current_inline_x, available_width);
-        }
-    }
-}
-
-Layout* layout_dom(DOMNode* root) {
-    Layout* layout = malloc(sizeof(Layout));
-    if (!layout) return NULL;
-    layout->boxes = NULL;
-    layout->count = 0;
-
-    int current_y = 10;            // Top margin.
-    int base_x = baseMargin;       // Left margin.
-    int current_inline_x = base_x;
-    int avail_width = defaultWindowWidth - 2 * baseMargin;
-
-    layout_node(root, layout, base_x, &current_y, &current_inline_x, avail_width);
-
-    return layout;
-}
-
-void free_layout(Layout* layout) {
-    if (!layout)
+        /* recurse into children, inheriting current inline position    */
+        for (int i = 0; i < node->children_count; ++i)
+            layout_node(node->children[i], lay,
+                        *cur_inline_x, cur_y, cur_inline_x,
+                        base_x + avail_w - (*cur_inline_x - base_x));
         return;
-    free(layout->boxes);
-    // Free the DOM that was stored in the layout.
-    if (layout->dom)
-        free_dom(layout->dom);
-    free(layout);
+    }
+
+    /* -----------------------------  OTHER / UNKNOWN ---------------- */
+    for (int i = 0; i < node->children_count; ++i)
+        layout_node(node->children[i], lay,
+                    base_x, cur_y, cur_inline_x, avail_w);
+}
+
+/* ------------------------------------------------------------------ */
+/* Public API                                                         */
+
+Layout *layout_dom(DOMNode *root)
+{
+    Layout *lay = calloc(1, sizeof *lay);
+    if (!lay) return NULL;
+
+    lay->dom = root;
+
+    int cur_y  = 10;                    /* top margin                 */
+    int base_x = BASE_MARGIN;
+    int cur_inline_x = base_x;
+    int avail_w = DEFAULT_WINDOW_W - 2 * BASE_MARGIN;
+
+    layout_node(root, lay, base_x, &cur_y, &cur_inline_x, avail_w);
+    return lay;
+}
+
+void free_layout(Layout *lay)
+{
+    if (!lay) return;
+    free(lay->boxes);
+    if (lay->dom)
+        free_dom(lay->dom);
+    free(lay);
 }
