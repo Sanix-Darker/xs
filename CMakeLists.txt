@@ -13,6 +13,7 @@ include_directories(
     ${SDL2_INCLUDE_DIRS}
     ${SDL2_TTF_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/mujs
 )
 
 file(GLOB GUMBO_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/gumbo_src/*.c")
@@ -24,9 +25,8 @@ add_executable(xs
     layout.c
     render.c
     javascript.c
-    duktape.c
+    mujs/one.c
     css.c
-    # gumbo sources (for parsing, because SKILL ISSUES)
     ${GUMBO_SOURCES}
 )
 
@@ -34,5 +34,25 @@ target_link_libraries(xs
     ${CURL_LIBRARIES}
     ${SDL2_LIBRARIES}
     ${SDL2_TTF_LIBRARIES}
-    m # <- this shit was hard as fuck to figured out
+    m
 )
+
+enable_testing()
+
+add_executable(xs_tests
+    tests/test_core.c
+    parser.c
+    css.c
+    layout.c
+    javascript.c
+    mujs/one.c
+    ${GUMBO_SOURCES}
+)
+
+target_link_libraries(xs_tests
+    ${SDL2_LIBRARIES}
+    ${SDL2_TTF_LIBRARIES}
+    m
+)
+
+add_test(NAME xs_tests COMMAND xs_tests)

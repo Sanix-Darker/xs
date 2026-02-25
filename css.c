@@ -49,9 +49,10 @@ CSSStyleSheet* parse_css(const char* css_text) {
         while (*p && *p != '}') {
             // Skip whitespace.
             while (*p && isspace(*p)) p++;
+            if (*p == '}') break;
             // Read property name until ':'
             const char* prop_start = p;
-            while (*p && *p != ':') p++;
+            while (*p && *p != ':' && *p != '}') p++;
             if (*p != ':') break;
             int prop_len = p - prop_start;
             char* property = malloc(prop_len + 1);
@@ -62,7 +63,7 @@ CSSStyleSheet* parse_css(const char* css_text) {
             p++; // skip ':'
             // Read value until ';'
             const char* val_start = p;
-            while (*p && *p != ';') p++;
+            while (*p && *p != ';' && *p != '}') p++;
             int val_len = p - val_start;
             char* value = malloc(val_len + 1);
             strncpy(value, val_start, val_len);
@@ -123,6 +124,8 @@ void ensure_computed_style(DOMNode* node) {
         node->style->width = NULL;
         node->style->height = NULL;
         node->style->background = NULL;
+        node->style->text_align = NULL;
+        node->style->font_size = NULL;
     }
 }
 
@@ -143,8 +146,13 @@ static void apply_rule_to_node(CSSRule* rule, DOMNode* node) {
         } else if (strcasecmp(decl->property, "background") == 0) {
             if (node->style->background) free(node->style->background);
             node->style->background = strdup(decl->value);
+        } else if (strcasecmp(decl->property, "font-size") == 0) {
+            if (node->style->font_size) free(node->style->font_size);
+            node->style->font_size = strdup(decl->value);
+        } else if (strcasecmp(decl->property, "text-align") == 0) {
+            if (node->style->text_align) free(node->style->text_align);
+            node->style->text_align = strdup(decl->value);
         }
-        // TODO: extend for more options on positions
     }
 }
 
