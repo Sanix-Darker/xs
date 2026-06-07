@@ -25,6 +25,9 @@ typedef struct {
 // Parse a CSS string and return a stylesheet.
 CSSStyleSheet* parse_css(const char* css_text);
 
+// Parse a bare declaration block (inline style="" value) into a 1-rule sheet.
+CSSStyleSheet* parse_css_declarations(const char* decls);
+
 // Free the stylesheet.
 void free_stylesheet(CSSStyleSheet* sheet);
 
@@ -36,6 +39,10 @@ typedef struct ComputedStyle ComputedStyle; // forward declaration
 
 // Attach computed style to a DOM node.
 void apply_stylesheet_to_dom(CSSStyleSheet* sheet, DOMNode* dom);
+
+// Run the inheritance pass ONCE after all stylesheets have been applied
+// (propagates inherited properties like color to descendants).
+void style_inherit(DOMNode* dom);
 
 // A helper: if a DOM node has no computed style, allocate one.
 void ensure_computed_style(DOMNode* node);
