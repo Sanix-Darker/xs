@@ -1,0 +1,22 @@
+XS-DUMP 1 width=800 height=700
+BOX x=30 y=18 w=740 h=22 fs=16 flags=---------- tag=p
+BOX x=304 y=18 w=28 h=22 fs=16 flags=---------- tag=#text text="This"
+BOX x=336 y=18 w=28 h=22 fs=16 flags=---------- tag=#text text="text"
+BOX x=368 y=18 w=42 h=22 fs=16 flags=---------- tag=#text text="should"
+BOX x=414 y=18 w=14 h=22 fs=16 flags=---------- tag=#text text="be"
+BOX x=432 y=18 w=63 h=22 fs=16 flags=---------- tag=#text text="centered."
+BOX x=30 y=66 w=740 h=22 fs=16 flags=---------- tag=p
+BOX x=547 y=66 w=28 h=22 fs=16 flags=---------- tag=#text text="This"
+BOX x=579 y=66 w=28 h=22 fs=16 flags=---------- tag=#text text="text"
+BOX x=611 y=66 w=42 h=22 fs=16 flags=---------- tag=#text text="should"
+BOX x=657 y=66 w=14 h=22 fs=16 flags=---------- tag=#text text="be"
+BOX x=675 y=66 w=35 h=22 fs=16 flags=---------- tag=#text text="right"
+BOX x=714 y=66 w=56 h=22 fs=16 flags=---------- tag=#text text="aligned."
+BOX x=30 y=114 w=740 h=22 fs=16 flags=---------- tag=p
+BOX x=30 y=114 w=28 h=22 fs=16 flags=---------- tag=#text text="This"
+BOX x=62 y=114 w=28 h=22 fs=16 flags=---------- tag=#text text="text"
+BOX x=94 y=114 w=14 h=22 fs=16 flags=---------- tag=#text text="is"
+BOX x=112 y=114 w=28 h=22 fs=16 flags=---------- tag=#text text="left"
+BOX x=144 y=114 w=49 h=22 fs=16 flags=---------- tag=#text text="aligned"
+BOX x=197 y=114 w=14 h=22 fs=16 flags=---------- tag=#text text="by"
+BOX x=215 y=114 w=56 h=22 fs=16 flags=---------- tag=#text text="default."

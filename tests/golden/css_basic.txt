@@ -1,0 +1,12 @@
+XS-DUMP 1 width=800 height=700
+BOX x=30 y=34 w=740 h=44 fs=32 flags=B-H------- tag=h1
+BOX x=307 y=34 w=84 h=44 fs=32 flags=B--------- tag=#text text="Styled"
+BOX x=395 y=34 w=98 h=44 fs=32 flags=B--------- tag=#text text="Heading"
+BOX x=30 y=108 w=740 h=25 fs=18 flags=---------- tag=p
+BOX x=30 y=108 w=7 h=25 fs=18 flags=---------- tag=#text text="A"
+BOX x=41 y=108 w=31 h=25 fs=18 flags=---------- tag=#text text="note"
+BOX x=76 y=108 w=78 h=25 fs=18 flags=---------- tag=#text text="paragraph."
+BOX x=30 y=151 w=600 h=51 fs=16 flags=--------S- tag=div
+BOX x=30 y=159 w=740 h=25 fs=18 flags=---------- tag=p
+BOX x=30 y=159 w=47 h=25 fs=18 flags=---------- tag=#text text="Inside"
+BOX x=81 y=159 w=39 h=25 fs=18 flags=---------- tag=#text text="main."

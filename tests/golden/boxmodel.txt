@@ -1,0 +1,10 @@
+XS-DUMP 1 width=800 height=700
+BOX x=30 y=18 w=740 h=22 fs=16 flags=---------- tag=p
+BOX x=30 y=18 w=42 h=22 fs=16 flags=---------- tag=#text text="Before"
+BOX x=30 y=98 w=740 h=88 fs=16 flags=--------S- tag=div
+BOX x=30 y=126 w=740 h=22 fs=16 flags=---------- tag=p
+BOX x=30 y=126 w=42 h=22 fs=16 flags=---------- tag=#text text="Inside"
+BOX x=76 y=126 w=42 h=22 fs=16 flags=---------- tag=#text text="spaced"
+BOX x=122 y=126 w=21 h=22 fs=16 flags=---------- tag=#text text="box"
+BOX x=30 y=244 w=740 h=22 fs=16 flags=---------- tag=p
+BOX x=30 y=244 w=35 h=22 fs=16 flags=---------- tag=#text text="After"

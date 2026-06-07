@@ -1,0 +1,18 @@
+XS-DUMP 1 width=800 height=700
+BOX x=30 y=34 w=740 h=39 fs=28 flags=B-H------- tag=h1
+BOX x=30 y=34 w=61 h=39 fs=28 flags=B--------- tag=#text text="Image"
+BOX x=95 y=34 w=49 h=39 fs=28 flags=B--------- tag=#text text="Test"
+BOX x=30 y=103 w=740 h=22 fs=16 flags=---------- tag=p
+BOX x=30 y=103 w=35 h=22 fs=16 flags=---------- tag=#text text="Below"
+BOX x=69 y=103 w=14 h=22 fs=16 flags=---------- tag=#text text="is"
+BOX x=87 y=103 w=14 h=22 fs=16 flags=---------- tag=#text text="an"
+BOX x=105 y=103 w=42 h=22 fs=16 flags=---------- tag=#text text="image:"
+BOX x=30 y=143 w=200 h=120 fs=16 flags=---------G tag=img
+BOX x=30 y=173 w=740 h=22 fs=16 flags=---------- tag=p
+BOX x=30 y=173 w=21 h=22 fs=16 flags=---------- tag=#text text="And"
+BOX x=55 y=173 w=14 h=22 fs=16 flags=---------- tag=#text text="an"
+BOX x=73 y=173 w=35 h=22 fs=16 flags=---------- tag=#text text="image"
+BOX x=112 y=173 w=28 h=22 fs=16 flags=---------- tag=#text text="with"
+BOX x=144 y=173 w=14 h=22 fs=16 flags=---------- tag=#text text="no"
+BOX x=162 y=173 w=35 h=22 fs=16 flags=---------- tag=#text text="size:"
+BOX x=30 y=213 w=120 h=80 fs=16 flags=---------G tag=img

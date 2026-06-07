@@ -1,0 +1,21 @@
+XS-DUMP 1 width=800 height=700
+BOX x=30 y=34 w=740 h=39 fs=28 flags=B-H------- tag=h1
+BOX x=30 y=34 w=61 h=39 fs=28 flags=B--------- tag=#text text="Specs"
+BOX x=30 y=105 w=249 h=34 fs=16 flags=--------S- tag=th
+BOX x=36 y=111 w=28 h=22 fs=16 flags=B--------- tag=#text text="Name"
+BOX x=279 y=105 w=242 h=34 fs=16 flags=--------S- tag=th
+BOX x=285 y=111 w=35 h=22 fs=16 flags=B--------- tag=#text text="Value"
+BOX x=521 y=105 w=249 h=34 fs=16 flags=--------S- tag=th
+BOX x=527 y=111 w=35 h=22 fs=16 flags=B--------- tag=#text text="Notes"
+BOX x=30 y=139 w=249 h=34 fs=16 flags=--------S- tag=td
+BOX x=36 y=145 w=35 h=22 fs=16 flags=---------- tag=#text text="Width"
+BOX x=279 y=139 w=242 h=34 fs=16 flags=--------S- tag=td
+BOX x=285 y=145 w=21 h=22 fs=16 flags=---------- tag=#text text="600"
+BOX x=521 y=139 w=249 h=34 fs=16 flags=--------S- tag=td
+BOX x=527 y=145 w=42 h=22 fs=16 flags=---------- tag=#text text="pixels"
+BOX x=30 y=173 w=249 h=34 fs=16 flags=--------S- tag=td
+BOX x=36 y=179 w=42 h=22 fs=16 flags=---------- tag=#text text="Height"
+BOX x=279 y=173 w=242 h=34 fs=16 flags=--------S- tag=td
+BOX x=285 y=179 w=21 h=22 fs=16 flags=---------- tag=#text text="400"
+BOX x=521 y=173 w=249 h=34 fs=16 flags=--------S- tag=td
+BOX x=527 y=179 w=42 h=22 fs=16 flags=---------- tag=#text text="pixels"

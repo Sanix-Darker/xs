@@ -1,0 +1,6 @@
+XS-DUMP 1 width=800 height=700
+BOX x=30 y=34 w=740 h=56 fs=40 flags=B-H------- tag=h1
+BOX x=30 y=34 w=122 h=56 fs=40 flags=B--------- tag=#text text="Heading"
+BOX x=30 y=120 w=740 h=28 fs=20 flags=---------- tag=p
+BOX x=30 y=120 w=78 h=28 fs=20 flags=---------- tag=#text text="Paragraph"
+BOX x=112 y=120 w=43 h=28 fs=20 flags=---------- tag=#text text="text."
